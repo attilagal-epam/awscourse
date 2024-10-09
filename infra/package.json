@@ -11,8 +11,8 @@
     "cdk": "cdk",
     "stage:webapp": "npm run build --prefix ../apps/shop-angular-cloudfront && cp -r ../apps/shop-angular-cloudfront/dist/app/browser/* ./resources/webapp",
     "cdk:bootstrap": "cdk bootstrap aws://247055019655/eu-west-3",
-    "deploy:init": "npm run stage:webapp && npm run build && npm run cdk:bootstrap",
-    "deploy:webapp": "cdk deploy",
+    "deploy:init": "npm run build && npm run cdk:bootstrap",
+    "deploy:webapp": "npm run stage:webapp && cdk deploy",
     "deploy": "deploy:init && deploy:webapp"
   },
   "devDependencies": {
