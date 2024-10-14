@@ -16,3 +16,6 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 ## Automatic deployment link
 CF: d3dvlg6uu5dl87.cloudfront.net
 Bucket: http://infrastack-deploymentfrontendbucket67ceb713-cdzlsoce22wl.s3-website.eu-west-3.amazonaws.com/
+
+## Manual deployment link
+CF: dflltg7ytuii32.cloudfront.net
