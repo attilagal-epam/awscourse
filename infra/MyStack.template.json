@@ -1,0 +1,351 @@
+Resources:
+  deploymentFrontendBucket67CEB713:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: aws-cdk:cr-owned:0574c773
+          Value: "true"
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Retain
+    Metadata:
+      aws:cdk:path: InfraStack/deployment/FrontendBucket/Resource
+  deploymentFrontendBucketPolicyF959E265:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: deploymentFrontendBucket67CEB713
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Principal:
+              CanonicalUser:
+                Fn::GetAtt:
+                  - deploymentCloudfrontDistributionOrigin1S3Origin6A73ABD8
+                  - S3CanonicalUserId
+            Resource:
+              Fn::Join:
+                - ""
+                - - Fn::GetAtt:
+                      - deploymentFrontendBucket67CEB713
+                      - Arn
+                  - /*
+        Version: "2012-10-17"
+    Metadata:
+      aws:cdk:path: InfraStack/deployment/FrontendBucket/Policy/Resource
+  deploymentCloudfrontDistributionOrigin1S3Origin6A73ABD8:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: Identity for InfraStackdeploymentCloudfrontDistributionOrigin180A8555A
+    Metadata:
+      aws:cdk:path: InfraStack/deployment/CloudfrontDistribution/Origin1/S3Origin/Resource
+  deploymentCloudfrontDistributionDDB77E0D:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        DefaultCacheBehavior:
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+          Compress: true
+          TargetOriginId: InfraStackdeploymentCloudfrontDistributionOrigin180A8555A
+          ViewerProtocolPolicy: redirect-to-https
+        DefaultRootObject: index.html
+        Enabled: true
+        HttpVersion: http2
+        IPV6Enabled: true
+        Origins:
+          - DomainName:
+              Fn::GetAtt:
+                - deploymentFrontendBucket67CEB713
+                - RegionalDomainName
+            Id: InfraStackdeploymentCloudfrontDistributionOrigin180A8555A
+            S3OriginConfig:
+              OriginAccessIdentity:
+                Fn::Join:
+                  - ""
+                  - - origin-access-identity/cloudfront/
+                    - Ref: deploymentCloudfrontDistributionOrigin1S3Origin6A73ABD8
+    Metadata:
+      aws:cdk:path: InfraStack/deployment/CloudfrontDistribution/Resource
+  deploymentFrontEndDeploymentAwsCliLayer1DD7F819:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      Content:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: 31a54de8fc55600d6d0d5ad60b980b65f0fa40116c6f0eec37facc3b4d11f6b8.zip
+      Description: /opt/awscli/aws
+    Metadata:
+      aws:cdk:path: InfraStack/deployment/FrontEndDeployment/AwsCliLayer/Resource
+      aws:asset:path: asset.31a54de8fc55600d6d0d5ad60b980b65f0fa40116c6f0eec37facc3b4d11f6b8.zip
+      aws:asset:is-bundled: false
+      aws:asset:property: Content
+  deploymentFrontEndDeploymentCustomResourceF33EC42E:
+    Type: Custom::CDKBucketDeployment
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536
+          - Arn
+      SourceBucketNames:
+        - Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+      SourceObjectKeys:
+        - 3c53010a2e983f0fd57adb65c8e1d40d38d92909115abaa2627b0086137a5310.zip
+      DestinationBucketName:
+        Ref: deploymentFrontendBucket67CEB713
+      Prune: true
+      DistributionId:
+        Ref: deploymentCloudfrontDistributionDDB77E0D
+      DistributionPaths:
+        - /*
+      OutputObjectKeys: true
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+    Metadata:
+      aws:cdk:path: InfraStack/deployment/FrontEndDeployment/CustomResource/Default
+  CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: InfraStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource
+  CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:List*
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":s3:::"
+                    - Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+                    - /*
+              - Fn::Join:
+                  - ""
+                  - - "arn:"
+                    - Ref: AWS::Partition
+                    - ":s3:::"
+                    - Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+          - Action:
+              - s3:Abort*
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:List*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - deploymentFrontendBucket67CEB713
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - deploymentFrontendBucket67CEB713
+                        - Arn
+                    - /*
+          - Action:
+              - cloudfront:CreateInvalidation
+              - cloudfront:GetInvalidation
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF
+      Roles:
+        - Ref: CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265
+    Metadata:
+      aws:cdk:path: InfraStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource
+  CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: c6358465bf49dfae556bb430bf9c81fa578c221b82c308e3707901b1dd654762.zip
+      Environment:
+        Variables:
+          AWS_CA_BUNDLE: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+      Handler: index.handler
+      Layers:
+        - Ref: deploymentFrontEndDeploymentAwsCliLayer1DD7F819
+      Role:
+        Fn::GetAtt:
+          - CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265
+          - Arn
+      Runtime: python3.11
+      Timeout: 900
+    DependsOn:
+      - CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF
+      - CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265
+    Metadata:
+      aws:cdk:path: InfraStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource
+      aws:asset:path: asset.c6358465bf49dfae556bb430bf9c81fa578c221b82c308e3707901b1dd654762
+      aws:asset:is-bundled: false
+      aws:asset:property: Code
+  CDKMetadata:
+    Type: AWS::CDK::Metadata
+    Properties:
+      Analytics: v2:deflate64:H4sIAAAAAAAA/3VQXWsCMRD8Lb7Hba9C6aueCIWCRaGvR0xWWS+XSDapSLj/3tzFr5c+zWTY3ZnMG1TvFVQTeeap0u3U0A7SNkjViiw1iWeQFlG1GES9t1dW4NsZUpeHfH2Xx0Iy9kIZF/XeOxsgLYmDp10M5KxYezqQnSuFzJ8abaAwXqqHhdWw8N/E85le8KxJGk/GXbo8AsV7eReEZMbAMB+gF0Z2Oy0h5TNf8oL+Bz0PabZkDwaDs6to1ZjvTvLojfeCZAdp4wwO8oiPDgrrbyaNGQya3KEyBPMz14ZGTzFmyQ3n3x1EHTm4boPsolfl7BNfx3CKQTxLtbOaShrrNMKRX36rD6hm8Do5MtHUx1xVh7Ap+Adf8M2p4AEAAA==
+    Metadata:
+      aws:cdk:path: InfraStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
+Outputs:
+  deploymentCloudFrontURL05BF422F:
+    Description: The CloudFront distribution URL
+    Value:
+      Fn::GetAtt:
+        - deploymentCloudfrontDistributionDDB77E0D
+        - DomainName
+    Export:
+      Name: CloudFrontURL
+  deploymentFrontendBucketURLCB04E932:
+    Description: The Frontend bucket URL
+    Value:
+      Fn::GetAtt:
+        - deploymentFrontendBucket67CEB713
+        - WebsiteURL
+    Export:
+      Name: FrontendBucketURL
+  deploymentFrontendBucketName6C369DBA:
+    Description: The Frontend bucket name
+    Value:
+      Ref: deploymentFrontendBucket67CEB713
+    Export:
+      Name: FrontendBucketName
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-3
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-4
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - il-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+      - Fn::Equals:
+          - Ref: AWS::Region
+          - us-west-2
+Parameters:
+  BootstrapVersion:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /cdk-bootstrap/hnb659fds/version
+    Description: Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]
+
