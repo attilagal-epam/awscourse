@@ -1,0 +1,25 @@
+{
+  "name": "awscourse",
+  "version": "1.0.0",
+  "description": "Practical part of EPAM aws course",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "stage:webapp": "npm run stage:webapp -w infra",
+    "deploy": "npm run deploy -w infra"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/attilagal-epam/awscourse.git"
+  },
+  "author": "Attila B. Gal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/attilagal-epam/awscourse/issues"
+  },
+  "homepage": "https://github.com/attilagal-epam/awscourse#readme",
+  "workspaces": [
+    "apps/*",
+    "infra"
+  ]
+}
